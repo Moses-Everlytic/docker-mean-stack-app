@@ -15,7 +15,7 @@ services:
         volumes:
             - ./node-express-server:/usr/src/app
         links:
-            - datebase
+            - database
 
     database:
         image: mongo
