@@ -6,14 +6,14 @@ services:
         ports:    
             - "4200:4200"
         volumes:
-            - ./angular-frontend:/app
+            - ./angular-frontend:/app:consistent
 
     express:
         build: node-express-server
         ports:
             - "3000:3000"
         volumes:
-            - ./node-express-server:/usr/src/app
+            - ./node-express-server:/usr/src/app:consistent
         links:
             - database
 
