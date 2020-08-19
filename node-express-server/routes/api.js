@@ -53,41 +53,29 @@ router.post('/user', (req, res) => {
         });
 });
 
-router.patch('/user/:id', (req, res) => {
+router.put('/user/:id', (req, res) => {
     const id = req.params.id;
-    const data = null;
+    let data = null;
 
     if (!ObjectID.isValid(id)) {
         return res.status(404).send();
     }
 
-    if (req.body.name) {
-        data = {
-            name: req.body.name
-        };
-    } else if (req.body.number) {
-        data = {
-            mobile: req.body.number
-        };
+    if (req.body.name || req.body.mobile) {
+        data = req.body;
     } else {
         return res.status(400).send();
     }
 
-    updateUserData(id, data);
+    updateUserData(res, id, data);
 });
 
-function updateUserData(id, data) {
+function updateUserData(res, id, data) {
     User.findByIdAndUpdate(id, {$set: data})
         .then(user => {
-            if (user.nModified > 0) {
-                res.status(200).json({
-                    message: 'Name saved successfully'
-                });
-            } else {
-                res.status(401).json({
-                    message: 'Invalid entry'
-                });
-            }
+            res.status(200).json({
+                message: 'Name saved successfully'
+            });
         }).catch(error => {
             res.status(500).json({
                 message: 'Unable to update user'
