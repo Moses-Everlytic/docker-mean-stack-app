@@ -6,7 +6,7 @@
     {{errorMessage}}
   </div>
   <mat-horizontal-stepper [linear]="isLinear" #stepper>
-    <mat-step [stepControl]="email">
+    <mat-step [stepControl]="email" [editable]="isEditable">
       <form [formGroup]="email">
         <ng-template matStepLabel>Fill in you email</ng-template>
         <mat-form-field>
@@ -19,7 +19,7 @@
         </div>
       </form>
     </mat-step>
-    <mat-step [stepControl]="name">
+    <mat-step [stepControl]="name" [editable]="isEditable">
       <form [formGroup]="name">
         <ng-template matStepLabel>Fill in your name</ng-template>
         <mat-form-field>
@@ -31,7 +31,7 @@
         </div>
       </form>
     </mat-step>
-    <mat-step [stepControl]="mobile">
+    <mat-step [stepControl]="mobile" [editable]="isEditable">
       <form [formGroup]="mobile">
         <ng-template matStepLabel>Fill in your mobile number</ng-template>
         <mat-form-field>

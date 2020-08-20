@@ -22,7 +22,7 @@ export class AppComponent implements OnInit {
 
   loader = false;
   isLinear = true;
-  editable = false;
+  isEditable = false;
   email: FormGroup;
   name: FormGroup;
   mobile: FormGroup;
