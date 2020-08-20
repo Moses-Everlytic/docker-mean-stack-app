@@ -1,6 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { map } from 'rxjs/operators';
+import { MatStepper } from '@angular/material/stepper';
+
+import { User } from './user.model';
 
 @Component({
   selector: 'app-root',
@@ -12,66 +16,190 @@ export class AppComponent implements OnInit {
 
   API = 'http://localhost:3000';
 
-  user: any[] = [];
+  user: User;
 
   userId = null;
 
+  loader = false;
   isLinear = true;
-  firstFormGroup: FormGroup;
-  secondFormGroup: FormGroup;
-  thirdFormGroup: FormGroup;
+  editable = false;
+  email: FormGroup;
+  name: FormGroup;
+  mobile: FormGroup;
 
-  constructor(private http: HttpClient, private _formBuilder: FormBuilder) {}
+  errorMessage = null;
+  mobileError = false;
+  emailError = false;
 
-  ngOnInit() {
-    this.firstFormGroup = this._formBuilder.group({
-      firstCtrl: ['', Validators.required]
+  @ViewChild('stepper') private stepper: MatStepper;
+
+  constructor(
+    private http: HttpClient,
+    private _formBuilder: FormBuilder
+  ) {}
+
+  ngOnInit(): void {
+    this.email = this._formBuilder.group({
+      email: ['', Validators.required]
     });
-    this.secondFormGroup = this._formBuilder.group({
-      secondCtrl: ['', Validators.required]
+    this.name = this._formBuilder.group({
+      name: ['', Validators.required]
     });
-    this.thirdFormGroup = this._formBuilder.group({
-      thirdCtrl: ['', Validators.required]
+    this.mobile = this._formBuilder.group({
+      mobile: ['', Validators.required]
     });
 
   }
 
-  addUser(email) {
-    this.http.post(`${this.API}/user`, {email})
-      .subscribe((repsonse: any) => {
-        this.userId = repsonse.data.id;
-        this.goToNextStep();
-      })
+  addUser(stepper): void {
+    this.clearErrorMessage();
+
+    const emailAdrress = this.email.value.email;
+
+    if (!this.emailIsValid(emailAdrress)) {
+      this.emailError = true;
+      this.hideErrorDelay(this.emailError);
+      return;
+    }
+
+    this.loader = true;
+
+    this.http.post(`${this.API}/user`, {email: emailAdrress})
+      .subscribe(
+        (response: any) => {
+          this.loader = false;
+
+          if (response.status === 'error') {
+            this.setErrorMessage(response.message);
+          } else {
+            this.userId = response.data.id;
+            this.goToNextStep(stepper);
+          }
+        },
+        error => {
+          this.setErrorMessage('Connection error, unable to connect to server');
+          this.loader = false;
+        }
+      );
   }
 
-  updateUserName(name) {
-    this.http.put(`${this.API}/user/${this.userId}`, {name})
-      .subscribe(() => {
-        this.goToNextStep();
-      })
+  addUserName(stepper): void {
+    this.clearErrorMessage();
+
+    const userName = this.name.value.name;
+
+    if (!userName) {
+      return;
+    }
+
+    this.loader = true;
+
+    this.http.put(`${this.API}/user/${this.userId}`, {name: userName})
+      .subscribe(
+        (response: any) => {
+          this.loader = false;
+
+          if (response.status === 'error') {
+            this.setErrorMessage(response.message);
+          } else {
+            this.goToNextStep(stepper);
+          }
+        },
+        error => {
+          this.setErrorMessage('Connection error, unable to connect to server');
+          this.loader = false;
+        }
+      );
   }
 
-  updateUserMobileNnmber(mobile) {
-    this.http.put(`${this.API}/user/${this.userId}`, {mobile})
-      .subscribe(() => {
-        this.goToNextStep();
-      })
+  addUserMobileNnmber(stepper): void {
+    this.clearErrorMessage();
+
+    this.loader = true;
+
+    const mobileNumber = this.mobile.value.mobile;
+
+    if (!this.mobileNumberValidation(mobileNumber)) {
+      this.loader = false;
+      this.mobileError = true;
+      this.hideErrorDelay(this.mobileError);
+
+      return;
+    }
+
+    this.http.put(`${this.API}/user/${this.userId}`, {mobile: Number(mobileNumber)})
+      .subscribe(
+        (response: any) => {
+          this.loader = false;
+
+          if (response.status === 'error') {
+            this.setErrorMessage(response.message);
+          } else {
+            this.goToNextStep(stepper);
+            this.getUser();
+          }
+        },
+        error => {
+          this.setErrorMessage('Connection error, unable to connect to server');
+          this.loader = false;
+        }
+      );
   }
 
+  getUser(): void {
+    this.clearErrorMessage();
 
-  getUser(userId) {
-    this.http.get(`${this.API}/users/${this.userId}`)
-      .subscribe((user: any) => {
-        this.user = user
-      })
+    if (this.userId === null) {
+      return;
+    }
+
+    this.loader = true;
+    this.http.get<{ email: string; name: string; mobile: number }>(`${this.API}/user/${this.userId}`)
+      .subscribe(
+        data => {
+          this.loader = false;
+
+          this.user = {
+            email: data.email,
+            name: data.name,
+            mobile: data.mobile
+          };
+        },
+        error => {
+          this.setErrorMessage('Connection error, unable to connect to server');
+          this.loader = false;
+        }
+      );
   }
 
-
-  goToNextStep() {
-
+  emailIsValid(email): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  resetAll() {
+  mobileNumberValidation(mobileNumber): boolean {
+    return mobileNumber.length === 10;
+  }
 
+  hideErrorDelay(variableComponent): void {
+    setTimeout(() => {
+      variableComponent = false;
+    }, 3000);
+  }
+
+  goToNextStep(stepper: MatStepper): void {
+    this.stepper.next();
+  }
+
+  setErrorMessage(message): void {
+    this.errorMessage = message;
+  }
+
+  clearErrorMessage(): void {
+    this.errorMessage = null;
+  }
+
+  reset(stepper: MatStepper): void {
+    this.user = null;
+    this.stepper.reset();
   }
 }

@@ -1,51 +1,68 @@
 <main>
+  <div class="loader">
+    <mat-spinner *ngIf="loader"></mat-spinner>
+  </div>
+  <div class="text-center error">
+    {{errorMessage}}
+  </div>
   <mat-horizontal-stepper [linear]="isLinear" #stepper>
-    <mat-step [stepControl]="firstFormGroup">
-      <form [formGroup]="firstFormGroup">
-        <ng-template matStepLabel>Fill out your name</ng-template>
+    <mat-step [stepControl]="email">
+      <form [formGroup]="email">
+        <ng-template matStepLabel>Fill in you email</ng-template>
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="Email" required>
+        </mat-form-field>
+        <div>
+          <div class="error" *ngIf="emailError">Please enter a valid email address.</div>
+          <button mat-button (click)="addUser(stepper)" type="button">Next</button>
+        </div>
+      </form>
+    </mat-step>
+    <mat-step [stepControl]="name">
+      <form [formGroup]="name">
+        <ng-template matStepLabel>Fill in your name</ng-template>
         <mat-form-field>
           <mat-label>Name</mat-label>
-          <input matInput placeholder="Last name, First name" formControlName="firstCtrl" required>
+          <input matInput formControlName="name" type="text" placeholder="Name" required>
         </mat-form-field>
         <div>
-          <button mat-button matStepperNext>Next</button>
+          <button mat-button (click)="addUserName(stepper)" type="button">Next</button>
         </div>
       </form>
     </mat-step>
-    <mat-step [stepControl]="secondFormGroup">
-      <form [formGroup]="secondFormGroup">
-        <ng-template matStepLabel>Fill out your address</ng-template>
+    <mat-step [stepControl]="mobile">
+      <form [formGroup]="mobile">
+        <ng-template matStepLabel>Fill in your mobile number</ng-template>
         <mat-form-field>
-          <mat-label>Address</mat-label>
-          <input matInput formControlName="secondCtrl" placeholder="Ex. 1 Main St, New York, NY"
+          <mat-label>Mobile number</mat-label>
+          <input matInput
+                 formControlName="mobile"
+                 placeholder="0840010002"
+                 oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');"
                  required>
         </mat-form-field>
         <div>
-          <button mat-button matStepperPrevious>Back</button>
-          <button mat-button matStepperNext>Next</button>
-        </div>
-      </form>
-    </mat-step>
-    <mat-step [stepControl]="thirdFormGroup">
-      <form [formGroup]="thirdFormGroup">
-        <ng-template matStepLabel>Fill out your address</ng-template>
-        <mat-form-field>
-          <mat-label>Address</mat-label>
-          <input matInput formControlName="thirdCtrl" placeholder="Ex. 1 Main St, New York, NY"
-                 required>
-        </mat-form-field>
-        <div>
-          <button mat-button matStepperPrevious>Back</button>
-          <button mat-button matStepperNext>Next</button>
+          <div class="error" *ngIf="mobileError">Please, enter a 10 digit mobile number</div>
+          <button mat-button (click)="addUserMobileNnmber(stepper)">Next</button>
         </div>
       </form>
     </mat-step>
     <mat-step>
       <ng-template matStepLabel>Done</ng-template>
-      <p>You are now done.</p>
+      <div *ngFor="let user of user">
+          <p>
+            Email entry {{user.email}}
+          </p>
+          <p>
+            Name entry {{user.name}}
+          </p>
+          <p>
+            Mobile number entry {{user.mobile}}
+          </p>
+      </div>
       <div>
-        <button mat-button matStepperPrevious>Back</button>
-        <button mat-button (click)="stepper.reset()">Reset</button>
+        <button mat-button (click)="reset(stepper)" color="success">Reset</button>
       </div>
     </mat-step>
   </mat-horizontal-stepper>

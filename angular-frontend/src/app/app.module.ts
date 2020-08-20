@@ -6,6 +6,8 @@ import { HttpClientModule } from '@angular/common/http'
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 
 import { AppComponent } from './app.component';
 
@@ -21,7 +23,9 @@ import { AppComponent } from './app.component';
     ReactiveFormsModule,
     MatButtonModule,
     MatInputModule,
-    MatStepperModule
+    MatStepperModule,
+    MatFormFieldModule,
+    MatProgressSpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]
