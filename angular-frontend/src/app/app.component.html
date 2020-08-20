@@ -50,7 +50,7 @@
     </mat-step>
     <mat-step>
       <ng-template matStepLabel>Done</ng-template>
-      <div>
+      <div *ngIf="user">
           <p>
             Email entry {{user.email}}
           </p>
